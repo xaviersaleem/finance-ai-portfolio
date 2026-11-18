@@ -1,0 +1,507 @@
+/// Central measure repository. Contains no data; all executive KPIs and supporting measures live here, organised by display folder.
+table _Measures
+	lineageTag: fad8f2bd-6463-47eb-baf0-221f99dc6cd7
+
+	/// Recognised revenue for the selected period, summed across all countries. Additive over time and geography.
+	measure Revenue = SUM ( Country_Performance[Revenue] )
+		formatString: \$#,##0;(\$#,##0)
+		displayFolder: 01 Revenue & Growth
+		lineageTag: 16baab10-caea-48c7-8666-e801804da1c1
+
+	/// Cost of goods sold (hosting, support and delivery) for the selected period. Sourced at company level only - deliberately returns blank when a Geography filter is applied, because cost is not attributable by country.
+	measure COGS = IF ( ISCROSSFILTERED ( 'Geography' ), BLANK (), SUM ( Monthly_Financials[COGS] ) )
+		formatString: \$#,##0;(\$#,##0)
+		displayFolder: 02 Profitability
+		lineageTag: d617d4f8-f63c-455d-8c19-e0fcd8356a89
+
+	/// Total operating expenditure (sales, marketing, R&D, G&A) for the selected period. Sourced at company level only - deliberately returns blank when a Geography filter is applied.
+	measure Opex = IF ( ISCROSSFILTERED ( 'Geography' ), BLANK (), SUM ( Monthly_Financials[Opex] ) )
+		formatString: \$#,##0;(\$#,##0)
+		displayFolder: 02 Profitability
+		lineageTag: 71c21b39-3076-4f8a-a9d5-b7504b990ac2
+
+	/// COGS plus Opex. The actuals counterpart to Cost Budget. Company level only - blank when a Geography filter is applied.
+	measure 'Total Cost' =
+			VAR _C = [COGS]
+			VAR _O = [Opex]
+			RETURN
+			    IF ( ISBLANK ( _C ) && ISBLANK ( _O ), BLANK (), _C + _O )
+		formatString: \$#,##0;(\$#,##0)
+		displayFolder: 02 Profitability
+		lineageTag: ca4e984f-02c0-4ac8-832f-7990d11363c4
+
+	/// Revenue less COGS. Company level only - blank when a Geography filter is applied, because COGS is not attributable by country.
+	measure 'Gross Profit' =
+			VAR _C = [COGS]
+			RETURN
+			    IF ( ISBLANK ( _C ), BLANK (), [Revenue] - _C )
+		formatString: \$#,##0;(\$#,##0)
+		displayFolder: 02 Profitability
+		lineageTag: b8b25cc1-73d3-4820-b7d7-3a1d29973b35
+
+	/// EXECUTIVE KPI. Revenue less COGS and Opex. No depreciation or amortisation is carried in the source data, so this is operating profit on a cash-cost basis. Company level only - blank when a Geography filter is applied.
+	measure EBITDA =
+			VAR _TC = [Total Cost]
+			RETURN
+			    IF ( ISBLANK ( _TC ), BLANK (), [Revenue] - _TC )
+		formatString: \$#,##0;(\$#,##0)
+		displayFolder: 02 Profitability
+		lineageTag: 0e6693f2-1d61-497d-8ea6-661e06ecf84e
+
+	/// Approved revenue plan, populated for all periods including months not yet closed. Held at company level only - returns blank when a Geography filter is applied because the plan is not phased by country.
+	measure 'Revenue Budget' = IF ( ISCROSSFILTERED ( 'Geography' ), BLANK (), SUM ( Monthly_Financials[Revenue_Budget] ) )
+		formatString: \$#,##0;(\$#,##0)
+		displayFolder: 03 Budget & Variance
+		lineageTag: 7812bb04-faa3-4042-b2d0-4e43b35cbe68
+
+	/// Approved total cost plan (COGS + Opex), populated for all periods. Held at company level only - returns blank when a Geography filter is applied.
+	measure 'Cost Budget' = IF ( ISCROSSFILTERED ( 'Geography' ), BLANK (), SUM ( Monthly_Financials[Cost_Budget] ) )
+		formatString: \$#,##0;(\$#,##0)
+		displayFolder: 03 Budget & Variance
+		lineageTag: e33fbccf-4203-4f7d-994f-f13ac45c76d3
+
+	/// Annual recurring revenue lost to cancellations and downgrades in the selected period. Additive over time.
+	measure 'Churned ARR' = SUM ( Country_Performance[ChurnedARR] )
+		formatString: \$#,##0;(\$#,##0)
+		displayFolder: 04 Customers & Retention
+		lineageTag: ccb60d12-1a8d-47f7-840d-aead3b94e528
+
+	/// Free cash flow generated or consumed in the selected period. Additive over time, company level only - returns blank when a Geography filter is applied.
+	measure 'Free Cash Flow' = IF ( ISCROSSFILTERED ( 'Geography' ), BLANK (), SUM ( Monthly_Financials[FreeCashFlow] ) )
+		formatString: \$#,##0;(\$#,##0)
+		displayFolder: 05 Cash & Liquidity
+		lineageTag: 5a760139-696e-41e1-84d6-bda3f0836299
+
+	/// Latest month with posted actuals inside the current filter context. Anchors all LTM windows and closed-period budget comparisons.
+	measure 'Last Closed Month' = CALCULATE ( MAX ( 'Date'[Month Start Date] ), KEEPFILTERS ( 'Date'[Is Actual Month] = TRUE ) )
+		formatString: yyyy-mm-dd
+		isHidden
+		displayFolder: 00 Reporting Context
+		lineageTag: 48d5911f-b776-4103-bcf9-3907374c28b6
+
+	/// Dynamic 'As at <month>' label for page headers. Derived from [Last Closed Month] so it sorts chronologically, not alphabetically. Reflects the latest closed month in the current filter context.
+	measure 'Reporting Period' =
+			VAR _End = [Last Closed Month]
+			RETURN
+			    IF ( NOT ISBLANK ( _End ), "As at " & FORMAT ( _End, "mmm yyyy" ) )
+		displayFolder: 00 Reporting Context
+		lineageTag: 1e418289-3639-47b5-b89b-cd1f2c029dff
+
+	/// Closing annual recurring revenue. Semi-additive: sums across countries but takes the last month with data over time.
+	measure ARR =
+			CALCULATE (
+			    SUM ( Country_Performance[ARR] ),
+			    LASTNONBLANK ( 'Date'[Date], CALCULATE ( COUNTROWS ( Country_Performance ) ) )
+			)
+		formatString: \$#,##0;(\$#,##0)
+		displayFolder: 04 Customers & Retention
+		lineageTag: 44c447f8-7774-4338-a5de-50a0f666e6d3
+
+	/// Closing customer count. Semi-additive: sums across countries but takes the last month with data over time.
+	measure Customers =
+			CALCULATE (
+			    SUM ( Country_Performance[Customers] ),
+			    LASTNONBLANK ( 'Date'[Date], CALCULATE ( COUNTROWS ( Country_Performance ) ) )
+			)
+		formatString: #,##0
+		displayFolder: 04 Customers & Retention
+		lineageTag: 8025de53-0958-44fc-b11c-5d347e3a9cdf
+
+	/// Closing cash and cash equivalents. Semi-additive over time (last month with data) and company level only - returns blank when a Geography filter is applied.
+	measure 'Cash Balance' =
+			IF (
+			    ISCROSSFILTERED ( 'Geography' ),
+			    BLANK (),
+			    CALCULATE (
+			        SUM ( Monthly_Financials[CashBalance] ),
+			        LASTNONBLANK ( 'Date'[Date], CALCULATE ( SUM ( Monthly_Financials[CashBalance] ) ) )
+			    )
+			)
+		formatString: \$#,##0;(\$#,##0)
+		displayFolder: 05 Cash & Liquidity
+		lineageTag: 28583d1e-3eb7-48ce-9c93-4363bfcf1f26
+
+	/// Revenue for the same period one year earlier.
+	measure 'Revenue LY' = CALCULATE ( [Revenue], SAMEPERIODLASTYEAR ( 'Date'[Date] ) )
+		formatString: \$#,##0;(\$#,##0)
+		displayFolder: 01 Revenue & Growth\Comparatives
+		lineageTag: df53fab5-deee-42fe-8444-6359a05dca03
+
+	/// Absolute revenue movement versus the same period last year.
+	measure 'Revenue YoY $' =
+			VAR _LY = [Revenue LY]
+			RETURN
+			    IF ( NOT ISBLANK ( [Revenue] ) && NOT ISBLANK ( _LY ), [Revenue] - _LY )
+		formatString: \$#,##0;(\$#,##0)
+		displayFolder: 01 Revenue & Growth\Comparatives
+		lineageTag: 00b0cafa-d0bb-495e-a814-e57c522ba8b9
+
+	/// EXECUTIVE KPI. Year-over-year revenue growth rate for the selected period.
+	measure 'Revenue YoY %' =
+			VAR _LY = [Revenue LY]
+			RETURN
+			    IF ( NOT ISBLANK ( [Revenue] ), DIVIDE ( [Revenue] - _LY, _LY ) )
+		formatString: 0.0%;-0.0%;0.0%
+		displayFolder: 01 Revenue & Growth\Comparatives
+		lineageTag: 7988a253-73de-40db-8e05-2a41af4a0126
+
+	/// Calendar year-to-date revenue through the latest month in context.
+	measure 'Revenue YTD' = TOTALYTD ( [Revenue], 'Date'[Date] )
+		formatString: \$#,##0;(\$#,##0)
+		displayFolder: 01 Revenue & Growth\Comparatives
+		lineageTag: 687601a3-fa02-4e06-8f7b-bdcab772291b
+
+	/// Prior-year calendar year-to-date revenue over the equivalent months.
+	measure 'Revenue YTD LY' = CALCULATE ( [Revenue YTD], DATEADD ( 'Date'[Date], -1, YEAR ) )
+		formatString: \$#,##0;(\$#,##0)
+		displayFolder: 01 Revenue & Growth\Comparatives
+		lineageTag: aae9bd72-6c02-4266-b44f-55b05e32aaff
+
+	/// Year-to-date revenue growth versus the same year-to-date period last year.
+	measure 'Revenue YTD YoY %' =
+			VAR _LY = [Revenue YTD LY]
+			RETURN
+			    IF ( NOT ISBLANK ( [Revenue YTD] ), DIVIDE ( [Revenue YTD] - _LY, _LY ) )
+		formatString: 0.0%;-0.0%;0.0%
+		displayFolder: 01 Revenue & Growth\Comparatives
+		lineageTag: b6ba1b50-8f4d-4baf-873b-2188366865ca
+
+	/// Trailing twelve month revenue ending at the latest closed month in context. Removes seasonality for growth and Rule of 40 reporting.
+	measure 'Revenue LTM' =
+			VAR _End = CALCULATE ( MAX ( 'Date'[Date] ), KEEPFILTERS ( 'Date'[Is Actual Month] = TRUE ) )
+			RETURN
+			    IF (
+			        NOT ISBLANK ( _End ),
+			        CALCULATE ( [Revenue], DATESINPERIOD ( 'Date'[Date], _End, -12, MONTH ) )
+			    )
+		formatString: \$#,##0;(\$#,##0)
+		displayFolder: 01 Revenue & Growth\Comparatives
+		lineageTag: 105984a2-738a-4ecf-85b9-ee570a9783ac
+
+	/// Trailing twelve month revenue for the preceding twelve month window.
+	measure 'Revenue LTM PY' =
+			VAR _End = CALCULATE ( MAX ( 'Date'[Date] ), KEEPFILTERS ( 'Date'[Is Actual Month] = TRUE ) )
+			VAR _PYEnd = EDATE ( _End, -12 )
+			RETURN
+			    IF (
+			        NOT ISBLANK ( _End ),
+			        CALCULATE ( [Revenue], DATESINPERIOD ( 'Date'[Date], _PYEnd, -12, MONTH ) )
+			    )
+		formatString: \$#,##0;(\$#,##0)
+		displayFolder: 01 Revenue & Growth\Comparatives
+		lineageTag: e2757ce6-1180-4d54-91c9-bea2ded73504
+
+	/// Trailing twelve month revenue growth rate. Input to the Rule of 40.
+	measure 'Revenue Growth % (LTM)' = DIVIDE ( [Revenue LTM] - [Revenue LTM PY], [Revenue LTM PY] )
+		formatString: 0.0%;-0.0%;0.0%
+		displayFolder: 01 Revenue & Growth\Comparatives
+		lineageTag: 568ea98a-c7a5-4648-a72d-950568d74d53
+
+	/// EXECUTIVE KPI. Gross profit as a percentage of revenue.
+	measure 'Gross Margin %' = DIVIDE ( [Gross Profit], [Revenue] )
+		formatString: 0.0%;-0.0%;0.0%
+		displayFolder: 02 Profitability
+		lineageTag: 0c3dfc55-4303-40d4-b8bf-b826bde13ab6
+
+	/// EXECUTIVE KPI. EBITDA as a percentage of revenue - the headline operating profitability measure.
+	measure 'EBITDA Margin %' = DIVIDE ( [EBITDA], [Revenue] )
+		formatString: 0.0%;-0.0%;0.0%
+		displayFolder: 02 Profitability
+		lineageTag: bf40a18e-85f4-48cc-b0d3-195424d4d870
+
+	/// EBITDA margin for the same period one year earlier.
+	measure 'EBITDA Margin % LY' = CALCULATE ( [EBITDA Margin %], SAMEPERIODLASTYEAR ( 'Date'[Date] ) )
+		formatString: 0.0%;-0.0%;0.0%
+		displayFolder: 02 Profitability
+		lineageTag: 1eff8f61-4cd7-47d7-a49e-8868d1228108
+
+	/// COGS as a percentage of revenue. The inverse of gross margin.
+	measure 'COGS Ratio %' = DIVIDE ( [COGS], [Revenue] )
+		formatString: 0.0%;-0.0%;0.0%
+		displayFolder: 02 Profitability
+		lineageTag: fdadedf8-8e8e-4c46-83cc-2608d974d6f2
+
+	/// Operating expenditure as a percentage of revenue. Tracks operating leverage.
+	measure 'Opex Ratio %' = DIVIDE ( [Opex], [Revenue] )
+		formatString: 0.0%;-0.0%;0.0%
+		displayFolder: 02 Profitability
+		lineageTag: c17b47bb-1b68-4d2d-a233-4d0c6c9cfe97
+
+	/// Revenue plan restricted to months that have posted actuals. Used for all like-for-like budget variance reporting.
+	measure 'Revenue Budget (Closed Periods)' = CALCULATE ( [Revenue Budget], KEEPFILTERS ( 'Date'[Is Actual Month] = TRUE ) )
+		formatString: \$#,##0;(\$#,##0)
+		displayFolder: 03 Budget & Variance
+		lineageTag: 1c137bd9-c2de-49ca-be79-d9f624847e9d
+
+	/// Cost plan restricted to months that have posted actuals. Used for all like-for-like budget variance reporting.
+	measure 'Cost Budget (Closed Periods)' = CALCULATE ( [Cost Budget], KEEPFILTERS ( 'Date'[Is Actual Month] = TRUE ) )
+		formatString: \$#,##0;(\$#,##0)
+		displayFolder: 03 Budget & Variance
+		lineageTag: 79e2da54-e402-41d5-af0d-6283033ff5bc
+
+	/// Revenue variance to plan over closed months. Positive is favourable.
+	measure 'Revenue vs Budget $' =
+			VAR _Bud = [Revenue Budget (Closed Periods)]
+			RETURN
+			    IF ( NOT ISBLANK ( [Revenue] ), [Revenue] - _Bud )
+		formatString: \$#,##0;(\$#,##0)
+		displayFolder: 03 Budget & Variance
+		lineageTag: ef695a67-c4f8-4023-b765-b2a0bc9a998b
+
+	/// EXECUTIVE KPI. Actual revenue as a percentage of plan over closed months. 100% means exactly on plan.
+	measure 'Budget Attainment %' =
+			VAR _Bud = [Revenue Budget (Closed Periods)]
+			RETURN
+			    IF ( NOT ISBLANK ( [Revenue] ), DIVIDE ( [Revenue], _Bud ) )
+		formatString: 0.0%;-0.0%;0.0%
+		displayFolder: 03 Budget & Variance
+		lineageTag: 04fe552e-8ea9-40a1-9256-0620e57532b1
+
+	/// Total cost variance to plan over closed months. Positive means overspend against plan.
+	measure 'Cost vs Budget $' =
+			VAR _Bud = [Cost Budget (Closed Periods)]
+			RETURN
+			    IF ( NOT ISBLANK ( [Total Cost] ), [Total Cost] - _Bud )
+		formatString: \$#,##0;(\$#,##0)
+		displayFolder: 03 Budget & Variance
+		lineageTag: 94ba76cf-b333-43fb-98f3-944f38f91dd3
+
+	/// EXECUTIVE KPI. Total cost overspend or underspend against plan as a percentage. Positive means overspend.
+	measure 'Cost vs Budget %' =
+			VAR _Bud = [Cost Budget (Closed Periods)]
+			RETURN
+			    IF ( NOT ISBLANK ( [Total Cost] ), DIVIDE ( [Total Cost] - _Bud, _Bud ) )
+		formatString: 0.0%;-0.0%;0.0%
+		displayFolder: 03 Budget & Variance
+		lineageTag: 460fe312-86ff-4321-bca6-d51730dada9d
+
+	/// Planned EBITDA implied by the revenue and cost budgets.
+	measure 'EBITDA Budget' = [Revenue Budget] - [Cost Budget]
+		formatString: \$#,##0;(\$#,##0)
+		displayFolder: 03 Budget & Variance
+		lineageTag: 354f87e4-dfa0-428f-b884-55a9a68c62f5
+
+	/// EBITDA variance to plan over closed months. Positive is favourable.
+	measure 'EBITDA vs Budget $' =
+			VAR _Bud = CALCULATE ( [EBITDA Budget], KEEPFILTERS ( 'Date'[Is Actual Month] = TRUE ) )
+			RETURN
+			    IF ( NOT ISBLANK ( [EBITDA] ), [EBITDA] - _Bud )
+		formatString: \$#,##0;(\$#,##0)
+		displayFolder: 03 Budget & Variance
+		lineageTag: 1e2650a4-75ff-40b7-8927-f27ecbd27eec
+
+	/// Revenue plan for months not yet closed within the selected period. Drives the forward outlook view.
+	measure 'Revenue Plan Remaining' = CALCULATE ( [Revenue Budget], KEEPFILTERS ( 'Date'[Is Actual Month] = FALSE ) )
+		formatString: \$#,##0;(\$#,##0)
+		displayFolder: 03 Budget & Variance
+		lineageTag: 999297e3-c5e3-495d-a6bf-795b79d9cc20
+
+	/// ARR as at the close of the month immediately preceding the selected period. Denominator for churn and starting point for the ARR bridge.
+	measure 'ARR Opening' =
+			VAR _Start = MIN ( 'Date'[Date] )
+			RETURN
+			    CALCULATE ( [ARR], FILTER ( ALL ( 'Date' ), 'Date'[Date] < _Start ) )
+		formatString: \$#,##0;(\$#,##0)
+		displayFolder: 04 Customers & Retention
+		lineageTag: 427e93a5-a51f-4cb8-8715-5b4c04700bf5
+
+	/// EXECUTIVE KPI. Net ARR added in the selected period: closing ARR less opening ARR. Net of churn.
+	measure 'Net New ARR' =
+			VAR _Open = [ARR Opening]
+			VAR _Close = [ARR]
+			RETURN
+			    IF ( NOT ISBLANK ( _Close ), _Close - _Open )
+		formatString: \$#,##0;(\$#,##0)
+		displayFolder: 04 Customers & Retention
+		lineageTag: a37c53b5-ef10-4c57-b006-50b551a8353e
+
+	/// Closing ARR at the equivalent point one year earlier.
+	measure 'ARR LY' = CALCULATE ( [ARR], SAMEPERIODLASTYEAR ( 'Date'[Date] ) )
+		formatString: \$#,##0;(\$#,##0)
+		displayFolder: 04 Customers & Retention
+		lineageTag: 783a0061-4cb4-433d-bc60-c04b030846cb
+
+	/// Year-over-year growth in closing ARR.
+	measure 'ARR Growth % YoY' =
+			VAR _LY = [ARR LY]
+			RETURN
+			    IF ( NOT ISBLANK ( [ARR] ), DIVIDE ( [ARR] - _LY, _LY ) )
+		formatString: 0.0%;-0.0%;0.0%
+		displayFolder: 04 Customers & Retention
+		lineageTag: 4f3e5722-c332-422b-94a9-48e4c55121ea
+
+	/// EXECUTIVE KPI. ARR lost in the period as a percentage of opening ARR. Lower is better.
+	measure 'Gross ARR Churn %' =
+			VAR _Open = [ARR Opening]
+			RETURN
+			    IF ( NOT ISBLANK ( [Churned ARR] ), DIVIDE ( [Churned ARR], _Open ) )
+		formatString: 0.0%;-0.0%;0.0%
+		displayFolder: 04 Customers & Retention
+		lineageTag: 39e8d0db-694a-4f34-845a-8820b70ecc29
+
+	/// Closing customer count at the equivalent point one year earlier.
+	measure 'Customers LY' = CALCULATE ( [Customers], SAMEPERIODLASTYEAR ( 'Date'[Date] ) )
+		formatString: #,##0
+		displayFolder: 04 Customers & Retention
+		lineageTag: 218d0c06-9607-4b58-8efd-ef10770cf20a
+
+	/// Net change in customer count over the selected period.
+	measure 'Net New Customers' =
+			VAR _Start = MIN ( 'Date'[Date] )
+			VAR _Open = CALCULATE ( [Customers], FILTER ( ALL ( 'Date' ), 'Date'[Date] < _Start ) )
+			RETURN
+			    IF ( NOT ISBLANK ( [Customers] ), [Customers] - _Open )
+		formatString: #,##0;(#,##0)
+		displayFolder: 04 Customers & Retention
+		lineageTag: d7aba39e-cd28-4ce6-93c0-b4c6b7412b2a
+
+	/// Average annual recurring revenue per customer (ARPA). Tracks pricing power and mix shift toward larger accounts.
+	measure 'ARR per Customer' = DIVIDE ( [ARR], [Customers] )
+		formatString: \$#,##0;(\$#,##0)
+		displayFolder: 04 Customers & Retention
+		lineageTag: e27f4da9-1641-4d40-be72-8b878f8beeaa
+
+	/// Closing cash balance at the equivalent point one year earlier.
+	measure 'Cash Balance LY' = CALCULATE ( [Cash Balance], SAMEPERIODLASTYEAR ( 'Date'[Date] ) )
+		formatString: \$#,##0;(\$#,##0)
+		displayFolder: 05 Cash & Liquidity
+		lineageTag: 68aabb74-f63e-49f0-9176-ffa9a066da1a
+
+	/// Free cash flow as a percentage of revenue for the selected period.
+	measure 'FCF Margin %' = DIVIDE ( [Free Cash Flow], [Revenue] )
+		formatString: 0.0%;-0.0%;0.0%
+		displayFolder: 05 Cash & Liquidity
+		lineageTag: 4020c9d0-a70f-4364-99e2-d5cfdbf0c210
+
+	/// Trailing twelve month free cash flow. Smooths the significant month-to-month volatility in cash conversion.
+	measure 'Free Cash Flow LTM' =
+			VAR _End = CALCULATE ( MAX ( 'Date'[Date] ), KEEPFILTERS ( 'Date'[Is Actual Month] = TRUE ) )
+			RETURN
+			    IF (
+			        NOT ISBLANK ( _End ),
+			        CALCULATE ( [Free Cash Flow], DATESINPERIOD ( 'Date'[Date], _End, -12, MONTH ) )
+			    )
+		formatString: \$#,##0;(\$#,##0)
+		displayFolder: 05 Cash & Liquidity
+		lineageTag: 3a0bd7e3-7947-4dd6-a16f-cb7bea0db61f
+
+	/// Trailing twelve month free cash flow as a percentage of trailing twelve month revenue. Input to the Rule of 40.
+	measure 'FCF Margin % (LTM)' = DIVIDE ( [Free Cash Flow LTM], [Revenue LTM] )
+		formatString: 0.0%;-0.0%;0.0%
+		displayFolder: 05 Cash & Liquidity
+		lineageTag: f06446b9-c74f-41ef-a464-cad30067068f
+
+	/// Average monthly total operating cost over the last three closed months. Denominator for the liquidity coverage measure.
+	measure 'Avg Monthly Operating Cost (3M)' =
+			VAR _End = CALCULATE ( MAX ( 'Date'[Date] ), KEEPFILTERS ( 'Date'[Is Actual Month] = TRUE ) )
+			RETURN
+			    IF (
+			        NOT ISBLANK ( _End ),
+			        DIVIDE ( CALCULATE ( [Total Cost], DATESINPERIOD ( 'Date'[Date], _End, -3, MONTH ) ), 3 )
+			    )
+		formatString: \$#,##0;(\$#,##0)
+		displayFolder: 05 Cash & Liquidity
+		lineageTag: adb7df03-fe0f-4e90-87f3-807bf2885b49
+
+	/// EXECUTIVE KPI. Number of months the closing cash balance would fund the current operating cost base with no further revenue collection.
+	measure 'Months of Liquidity' = DIVIDE ( [Cash Balance], [Avg Monthly Operating Cost (3M)] )
+		formatString: 0.0" mo"
+		displayFolder: 05 Cash & Liquidity
+		lineageTag: 550aafa2-0dc3-493e-91e8-5c1097e2960c
+
+	/// EXECUTIVE KPI. Trailing twelve month revenue growth rate plus trailing twelve month free cash flow margin. The benchmark SaaS test of balanced growth and efficiency. 40% or above is healthy.
+	measure 'Rule of 40 %' =
+			VAR _Growth = [Revenue Growth % (LTM)]
+			VAR _Margin = [FCF Margin % (LTM)]
+			RETURN
+			    IF ( NOT ISBLANK ( _Growth ) && NOT ISBLANK ( _Margin ), _Growth + _Margin )
+		formatString: 0.0%;-0.0%;0.0%
+		displayFolder: 05 Cash & Liquidity
+		lineageTag: c85f3c20-bb7a-4be1-8cd9-d9ed729134b5
+
+	/// Gross ARR churn rate for the same period one year earlier.
+	measure 'Gross ARR Churn % LY' = CALCULATE ( [Gross ARR Churn %], SAMEPERIODLASTYEAR ( 'Date'[Date] ) )
+		formatString: 0.0%;-0.0%;0.0%
+		displayFolder: 04 Customers & Retention
+		lineageTag: 83e34b53-fa2e-4c94-ac6b-cb6ba54e0251
+
+	/// Conditional formatting colour for revenue budget attainment. Green at or above plan, amber within 3% of plan, red below.
+	measure 'Colour | Budget Attainment' =
+			VAR _v = [Budget Attainment %]
+			RETURN
+			    SWITCH ( TRUE (), ISBLANK ( _v ), "#5A6472", _v >= 1, "#1B7F5A", _v >= 0.97, "#B26B00", "#B3261E" )
+		isHidden
+		displayFolder: 06 KPI Formatting
+		lineageTag: 902b40aa-e20f-44cf-8e91-db4a6c847b53
+
+	/// Conditional formatting colour for cost control. Green at or under plan, amber up to 2% over, red beyond.
+	measure 'Colour | Cost vs Budget' =
+			VAR _v = [Cost vs Budget %]
+			RETURN
+			    SWITCH ( TRUE (), ISBLANK ( _v ), "#5A6472", _v <= 0, "#1B7F5A", _v <= 0.02, "#B26B00", "#B3261E" )
+		isHidden
+		displayFolder: 06 KPI Formatting
+		lineageTag: a97a1298-f174-4bad-829c-cf13b35c0a5d
+
+	/// Conditional formatting colour for EBITDA margin. Green when at or above the prior-year margin, red when below.
+	measure 'Colour | EBITDA Margin' =
+			VAR _v = [EBITDA Margin %]
+			VAR _ly = [EBITDA Margin % LY]
+			RETURN
+			    SWITCH ( TRUE (), ISBLANK ( _v ) || ISBLANK ( _ly ), "#5A6472", _v >= _ly, "#1B7F5A", "#B3261E" )
+		isHidden
+		displayFolder: 06 KPI Formatting
+		lineageTag: 5ae07bec-806c-4c2e-98b5-0b09deed94ee
+
+	/// Conditional formatting colour for churn. Green when churn is at or below the prior-year rate, red when it has deteriorated.
+	measure 'Colour | Gross ARR Churn' =
+			VAR _v = [Gross ARR Churn %]
+			VAR _ly = [Gross ARR Churn % LY]
+			RETURN
+			    SWITCH ( TRUE (), ISBLANK ( _v ) || ISBLANK ( _ly ), "#5A6472", _v <= _ly, "#1B7F5A", "#B3261E" )
+		isHidden
+		displayFolder: 06 KPI Formatting
+		lineageTag: 4095a401-2137-4914-85b2-55d0ebb97e74
+
+	/// Conditional formatting colour for the Rule of 40. Green at or above 40%, amber 30-40%, red below 30%.
+	measure 'Colour | Rule of 40' =
+			VAR _v = [Rule of 40 %]
+			RETURN
+			    SWITCH ( TRUE (), ISBLANK ( _v ), "#5A6472", _v >= 0.4, "#1B7F5A", _v >= 0.3, "#B26B00", "#B3261E" )
+		isHidden
+		displayFolder: 06 KPI Formatting
+		lineageTag: 7711c664-c551-4b99-8552-aff9f676a2b8
+
+	/// Conditional formatting colour for revenue growth. Green at or above 20%, amber 10-20%, red below 10%.
+	measure 'Colour | Revenue YoY' =
+			VAR _v = [Revenue YoY %]
+			RETURN
+			    SWITCH ( TRUE (), ISBLANK ( _v ), "#5A6472", _v >= 0.2, "#1B7F5A", _v >= 0.1, "#B26B00", "#B3261E" )
+		isHidden
+		displayFolder: 06 KPI Formatting
+		lineageTag: c1dfacd0-9d8f-4bc9-9248-d31283b5dc4c
+
+	/// Value for each step of the EBITDA plan-to-actual waterfall. Plan EBITDA plus the revenue variance less the cost variance reconciles exactly to actual EBITDA. Use only with 'EBITDA Bridge'[Step].
+	measure 'EBITDA Bridge Value' =
+			SWITCH (
+			    SELECTEDVALUE ( 'EBITDA Bridge'[Step] ),
+			    "Plan EBITDA", CALCULATE ( [EBITDA Budget], KEEPFILTERS ( 'Date'[Is Actual Month] = TRUE ) ),
+			    "Revenue vs Plan", [Revenue vs Budget $],
+			    "Cost vs Plan", -1 * [Cost vs Budget $],
+			    [EBITDA]
+			)
+		formatString: \$#,##0;(\$#,##0)
+		displayFolder: 03 Budget & Variance
+		lineageTag: 24061911-fecf-47fd-aee5-275cb0fa8a1a
+
+	column _
+		isHidden
+		lineageTag: 5194a8ee-07be-4b3e-a3ad-6a8c8f58385b
+		summarizeBy: none
+		isNameInferred
+		sourceColumn: [_]
+
+	partition _Measures = calculated
+		mode: import
+		source = ROW ( "_", BLANK () )
+

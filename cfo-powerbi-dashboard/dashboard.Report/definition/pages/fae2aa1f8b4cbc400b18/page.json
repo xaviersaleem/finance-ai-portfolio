@@ -1,0 +1,183 @@
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/page/2.1.0/schema.json",
+  "name": "fae2aa1f8b4cbc400b18",
+  "displayName": "Executive Summary",
+  "displayOption": "FitToPage",
+  "height": 720,
+  "width": 1280,
+  "objects": {
+    "background": [
+      {
+        "properties": {
+          "color": {
+            "solid": {
+              "color": {
+                "expr": {
+                  "Literal": {
+                    "Value": "'#F4F6F8'"
+                  }
+                }
+              }
+            }
+          },
+          "transparency": {
+            "expr": {
+              "Literal": {
+                "Value": "0D"
+              }
+            }
+          }
+        }
+      }
+    ],
+    "outspace": [
+      {
+        "properties": {
+          "color": {
+            "solid": {
+              "color": {
+                "expr": {
+                  "Literal": {
+                    "Value": "'#F4F6F8'"
+                  }
+                }
+              }
+            }
+          },
+          "transparency": {
+            "expr": {
+              "Literal": {
+                "Value": "0D"
+              }
+            }
+          }
+        }
+      }
+    ],
+    "displayArea": [
+      {
+        "properties": {
+          "verticalAlignment": {
+            "expr": {
+              "Literal": {
+                "Value": "'Top'"
+              }
+            }
+          }
+        }
+      }
+    ]
+  },
+  "filterConfig": {
+    "filters": [
+      {
+        "name": "p1pgf",
+        "type": "Categorical",
+        "field": {
+          "Column": {
+            "Expression": {
+              "SourceRef": {
+                "Entity": "Date"
+              }
+            },
+            "Property": "Is Actual Month"
+          }
+        },
+        "filter": {
+          "Version": 2,
+          "From": [
+            {
+              "Name": "t",
+              "Entity": "Date",
+              "Type": 0
+            }
+          ],
+          "Where": [
+            {
+              "Condition": {
+                "In": {
+                  "Expressions": [
+                    {
+                      "Column": {
+                        "Expression": {
+                          "SourceRef": {
+                            "Source": "t"
+                          }
+                        },
+                        "Property": "Is Actual Month"
+                      }
+                    }
+                  ],
+                  "Values": [
+                    [
+                      {
+                        "Literal": {
+                          "Value": "true"
+                        }
+                      }
+                    ]
+                  ]
+                }
+              }
+            }
+          ]
+        },
+        "howCreated": "User",
+        "isHiddenInViewMode": true,
+        "isLockedInViewMode": true
+      }
+    ]
+  },
+  "visualInteractions": [
+    {
+      "source": "p1a2",
+      "target": "p1kpi0",
+      "type": "NoFilter"
+    },
+    {
+      "source": "p1a2",
+      "target": "p1kpi1",
+      "type": "NoFilter"
+    },
+    {
+      "source": "p1a2",
+      "target": "p1kpi2",
+      "type": "NoFilter"
+    },
+    {
+      "source": "p1a2",
+      "target": "p1kpi3",
+      "type": "NoFilter"
+    },
+    {
+      "source": "p1a2",
+      "target": "p1kpi4",
+      "type": "NoFilter"
+    },
+    {
+      "source": "p1a2",
+      "target": "p1kpi5",
+      "type": "NoFilter"
+    },
+    {
+      "source": "p1a2",
+      "target": "p1a1",
+      "type": "NoFilter"
+    },
+    {
+      "source": "p1a2",
+      "target": "p1b1",
+      "type": "NoFilter"
+    },
+    {
+      "source": "p1a2",
+      "target": "p1b2",
+      "type": "NoFilter"
+    },
+    {
+      "source": "p1a2",
+      "target": "p1ctx",
+      "type": "NoFilter"
+    }
+  ]
+}

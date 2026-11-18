@@ -1,0 +1,26 @@
+/// TitanFlow executive CFO semantic model. Star schema: two fact tables (Monthly_Financials at company/month grain, Country_Performance at country/month grain) joined to a marked Date dimension and a Geography dimension. All reporting logic is delivered through explicit measures in the _Measures table. Actuals run Jan-2021 to Jun-2026; the revenue and cost budget extends to Dec-2026.
+model Model
+	culture: en-US
+	defaultPowerBIDataSourceVersion: powerBI_V3
+	discourageImplicitMeasures
+	sourceQueryCulture: en-US
+	valueFilterBehavior: independent
+	dataAccessOptions
+		legacyRedirects
+		returnErrorValuesAsNull
+
+annotation __PBI_TimeIntelligenceEnabled = 1
+
+annotation PBI_QueryOrder = ["Monthly_Financials","Country_Performance"]
+
+annotation PBI_ProTooling = ["MCP-PBIModeling","DevMode"]
+
+ref table Monthly_Financials
+ref table Country_Performance
+ref table Date
+ref table Geography
+ref table _Measures
+ref table 'EBITDA Bridge'
+
+ref cultureInfo en-US
+

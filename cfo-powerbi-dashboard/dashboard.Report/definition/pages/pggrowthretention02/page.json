@@ -1,0 +1,283 @@
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/page/2.1.0/schema.json",
+  "name": "pggrowthretention02",
+  "displayName": "Growth & Retention",
+  "displayOption": "FitToPage",
+  "height": 720,
+  "width": 1280,
+  "filterConfig": {
+    "filters": [
+      {
+        "name": "p2pgf",
+        "field": {
+          "Column": {
+            "Expression": {
+              "SourceRef": {
+                "Entity": "Date"
+              }
+            },
+            "Property": "Is Actual Month"
+          }
+        },
+        "type": "Categorical",
+        "filter": {
+          "Version": 2,
+          "From": [
+            {
+              "Name": "t",
+              "Entity": "Date",
+              "Type": 0
+            }
+          ],
+          "Where": [
+            {
+              "Condition": {
+                "In": {
+                  "Expressions": [
+                    {
+                      "Column": {
+                        "Expression": {
+                          "SourceRef": {
+                            "Source": "t"
+                          }
+                        },
+                        "Property": "Is Actual Month"
+                      }
+                    }
+                  ],
+                  "Values": [
+                    [
+                      {
+                        "Literal": {
+                          "Value": "true"
+                        }
+                      }
+                    ]
+                  ]
+                }
+              }
+            }
+          ]
+        },
+        "howCreated": "User",
+        "isHiddenInViewMode": true,
+        "isLockedInViewMode": true
+      },
+      {
+        "name": "p2dtregion",
+        "field": {
+          "Column": {
+            "Expression": {
+              "SourceRef": {
+                "Entity": "Geography"
+              }
+            },
+            "Property": "Region"
+          }
+        },
+        "type": "Categorical",
+        "howCreated": "Drillthrough",
+        "objects": {
+          "general": [
+            {
+              "properties": {
+                "requireSingleSelect": {
+                  "expr": {
+                    "Literal": {
+                      "Value": "true"
+                    }
+                  }
+                }
+              }
+            }
+          ]
+        }
+      },
+      {
+        "name": "p2dtcountry",
+        "field": {
+          "Column": {
+            "Expression": {
+              "SourceRef": {
+                "Entity": "Geography"
+              }
+            },
+            "Property": "Country"
+          }
+        },
+        "type": "Categorical",
+        "howCreated": "Drillthrough",
+        "objects": {
+          "general": [
+            {
+              "properties": {
+                "requireSingleSelect": {
+                  "expr": {
+                    "Literal": {
+                      "Value": "true"
+                    }
+                  }
+                }
+              }
+            }
+          ]
+        }
+      }
+    ]
+  },
+  "pageBinding": {
+    "name": "drillthroughGrowth",
+    "type": "Drillthrough",
+    "parameters": []
+  },
+  "objects": {
+    "background": [
+      {
+        "properties": {
+          "color": {
+            "solid": {
+              "color": {
+                "expr": {
+                  "Literal": {
+                    "Value": "'#F4F6F8'"
+                  }
+                }
+              }
+            }
+          },
+          "transparency": {
+            "expr": {
+              "Literal": {
+                "Value": "0D"
+              }
+            }
+          }
+        }
+      }
+    ],
+    "outspace": [
+      {
+        "properties": {
+          "color": {
+            "solid": {
+              "color": {
+                "expr": {
+                  "Literal": {
+                    "Value": "'#F4F6F8'"
+                  }
+                }
+              }
+            }
+          },
+          "transparency": {
+            "expr": {
+              "Literal": {
+                "Value": "0D"
+              }
+            }
+          }
+        }
+      }
+    ],
+    "displayArea": [
+      {
+        "properties": {
+          "verticalAlignment": {
+            "expr": {
+              "Literal": {
+                "Value": "'Top'"
+              }
+            }
+          }
+        }
+      }
+    ]
+  },
+  "visualInteractions": [
+    {
+      "source": "p2b2",
+      "target": "p2kpi0",
+      "type": "NoFilter"
+    },
+    {
+      "source": "p2b2",
+      "target": "p2kpi1",
+      "type": "NoFilter"
+    },
+    {
+      "source": "p2b2",
+      "target": "p2kpi2",
+      "type": "NoFilter"
+    },
+    {
+      "source": "p2b2",
+      "target": "p2kpi3",
+      "type": "NoFilter"
+    },
+    {
+      "source": "p2b2",
+      "target": "p2kpi4",
+      "type": "NoFilter"
+    },
+    {
+      "source": "p2b2",
+      "target": "p2kpi5",
+      "type": "NoFilter"
+    },
+    {
+      "source": "p2b2",
+      "target": "p2a1",
+      "type": "NoFilter"
+    },
+    {
+      "source": "p2b2",
+      "target": "p2a2",
+      "type": "NoFilter"
+    },
+    {
+      "source": "p2b2",
+      "target": "p2ctx",
+      "type": "NoFilter"
+    },
+    {
+      "source": "p2b2",
+      "target": "p2b1",
+      "type": "HighlightFilter"
+    },
+    {
+      "source": "p2b1",
+      "target": "p2b2",
+      "type": "HighlightFilter"
+    },
+    {
+      "source": "p2a2",
+      "target": "p2kpi0",
+      "type": "DataFilter"
+    },
+    {
+      "source": "p2a2",
+      "target": "p2kpi1",
+      "type": "DataFilter"
+    },
+    {
+      "source": "p2a2",
+      "target": "p2kpi2",
+      "type": "DataFilter"
+    },
+    {
+      "source": "p2a2",
+      "target": "p2kpi3",
+      "type": "DataFilter"
+    },
+    {
+      "source": "p2a2",
+      "target": "p2kpi4",
+      "type": "DataFilter"
+    },
+    {
+      "source": "p2a2",
+      "target": "p2kpi5",
+      "type": "DataFilter"
+    }
+  ]
+}

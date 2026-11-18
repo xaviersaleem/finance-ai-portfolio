@@ -1,0 +1,75 @@
+/// Geography dimension: Region > Country hierarchy sourced from Country_Performance. Provides clean slicers and reliable map geocoding.
+table Geography
+	lineageTag: 0a8253c8-b888-4a70-a3e4-a92923a0935e
+
+	/// Country of the customer account. Geocoded for map visuals.
+	column Country
+		lineageTag: fb1f6502-8a41-4392-8dc3-e31dbe06ab5e
+		dataCategory: Country
+		summarizeBy: none
+		isNameInferred
+		sourceColumn: [Country]
+
+	/// Sales region: North America, Europe, APAC, LATAM. Sorted by revenue scale.
+	column Region
+		lineageTag: a90b7acb-6f0c-4fd4-b2bd-20db14ad0da1
+		summarizeBy: none
+		isNameInferred
+		sourceColumn: [Region]
+		sortByColumn: 'Region Sort'
+
+	/// ISO 3166-1 alpha-3 code. Use in map visuals when country-name geocoding is ambiguous.
+	column 'Country Code'
+		displayFolder: Geo Keys
+		lineageTag: 71f61f2b-d766-415c-b39d-8307f32e8e0d
+		dataCategory: Country
+		summarizeBy: none
+		isNameInferred
+		sourceColumn: [Country Code]
+
+	/// Sort key for Region.
+	column 'Region Sort'
+		isHidden
+		lineageTag: bee809fb-036d-433f-9109-706bcf1cb639
+		summarizeBy: none
+		isNameInferred
+		sourceColumn: [Region Sort]
+
+	/// Region > Country drill path for all geographic visuals.
+	hierarchy Geography
+		lineageTag: 4acefd90-5d1e-41ec-a888-a966361dfb03
+
+		level Region
+			lineageTag: 543b3eea-6dac-464b-bb39-a0ac3c02e133
+			column: Region
+
+		level Country
+			lineageTag: 25b64473-8ea4-4aa9-b858-9d0d39ba495d
+			column: Country
+
+	partition Geography = calculated
+		mode: import
+		source =
+				VAR _Base = SUMMARIZE ( Country_Performance, Country_Performance[Region], Country_Performance[Country] )
+				RETURN
+				    SELECTCOLUMNS (
+				        _Base,
+				        "Country", Country_Performance[Country],
+				        "Region", Country_Performance[Region],
+				        "Country Code",
+				            SWITCH (
+				                Country_Performance[Country],
+				                "United States", "USA", "Canada", "CAN", "United Kingdom", "GBR",
+				                "Germany", "DEU", "France", "FRA", "Netherlands", "NLD",
+				                "Spain", "ESP", "Sweden", "SWE", "Australia", "AUS",
+				                "Japan", "JPN", "Singapore", "SGP", "India", "IND",
+				                "Brazil", "BRA", "Mexico", "MEX", "Chile", "CHL",
+				                "Colombia", "COL", BLANK ()
+				            ),
+				        "Region Sort",
+				            SWITCH (
+				                Country_Performance[Region],
+				                "North America", 1, "Europe", 2, "APAC", 3, "LATAM", 4, 99
+				            )
+				    )
+

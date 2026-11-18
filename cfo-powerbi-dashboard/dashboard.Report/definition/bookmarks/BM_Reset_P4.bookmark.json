@@ -1,0 +1,24 @@
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/bookmark/1.1.0/schema.json",
+  "name": "BM_Reset_P4",
+  "displayName": "Reset Cash & Outlook",
+  "options": {
+    "suppressDisplay": true,
+    "suppressActiveSection": true
+  },
+  "explorationState": {
+    "version": "1.0",
+    "activeSection": "pgcashoutlook000004",
+    "filters": {
+      "byExpr": []
+    },
+    "sections": {
+      "pgcashoutlook000004": {
+        "filters": {
+          "byExpr": []
+        },
+        "visualContainers": {}
+      }
+    }
+  }
+}

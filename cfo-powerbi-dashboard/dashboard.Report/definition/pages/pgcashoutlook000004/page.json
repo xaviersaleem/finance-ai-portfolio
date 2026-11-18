@@ -1,0 +1,123 @@
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/page/2.1.0/schema.json",
+  "name": "pgcashoutlook000004",
+  "displayName": "Cash & Outlook",
+  "displayOption": "FitToPage",
+  "height": 720,
+  "width": 1280,
+  "objects": {
+    "background": [
+      {
+        "properties": {
+          "color": {
+            "solid": {
+              "color": {
+                "expr": {
+                  "Literal": {
+                    "Value": "'#F4F6F8'"
+                  }
+                }
+              }
+            }
+          },
+          "transparency": {
+            "expr": {
+              "Literal": {
+                "Value": "0D"
+              }
+            }
+          }
+        }
+      }
+    ],
+    "outspace": [
+      {
+        "properties": {
+          "color": {
+            "solid": {
+              "color": {
+                "expr": {
+                  "Literal": {
+                    "Value": "'#F4F6F8'"
+                  }
+                }
+              }
+            }
+          },
+          "transparency": {
+            "expr": {
+              "Literal": {
+                "Value": "0D"
+              }
+            }
+          }
+        }
+      }
+    ],
+    "displayArea": [
+      {
+        "properties": {
+          "verticalAlignment": {
+            "expr": {
+              "Literal": {
+                "Value": "'Top'"
+              }
+            }
+          }
+        }
+      }
+    ]
+  },
+  "visualInteractions": [
+    {
+      "source": "p4a2",
+      "target": "p4kpi0",
+      "type": "NoFilter"
+    },
+    {
+      "source": "p4a2",
+      "target": "p4kpi1",
+      "type": "NoFilter"
+    },
+    {
+      "source": "p4a2",
+      "target": "p4kpi2",
+      "type": "NoFilter"
+    },
+    {
+      "source": "p4a2",
+      "target": "p4kpi3",
+      "type": "NoFilter"
+    },
+    {
+      "source": "p4a2",
+      "target": "p4kpi4",
+      "type": "NoFilter"
+    },
+    {
+      "source": "p4a2",
+      "target": "p4kpi5",
+      "type": "NoFilter"
+    },
+    {
+      "source": "p4a2",
+      "target": "p4a1",
+      "type": "NoFilter"
+    },
+    {
+      "source": "p4a2",
+      "target": "p4b1",
+      "type": "NoFilter"
+    },
+    {
+      "source": "p4a2",
+      "target": "p4b2",
+      "type": "NoFilter"
+    },
+    {
+      "source": "p4a2",
+      "target": "p4ctx",
+      "type": "NoFilter"
+    }
+  ]
+}

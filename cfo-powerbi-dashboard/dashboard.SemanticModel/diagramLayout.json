@@ -1,0 +1,100 @@
+{
+  "version": "1.1.0",
+  "diagrams": [
+    {
+      "ordinal": 0,
+      "scrollPosition": {
+        "x": 0,
+        "y": 0
+      },
+      "nodes": [
+        {
+          "location": {
+            "x": 334,
+            "y": 3.375
+          },
+          "nodeIndex": "Country_Performance",
+          "nodeLineageTag": "23391055-13a6-4bf6-a317-329de38fb4bd",
+          "size": {
+            "height": 248,
+            "width": 234
+          },
+          "zIndex": 0
+        },
+        {
+          "location": {
+            "x": 50,
+            "y": 3.375
+          },
+          "nodeIndex": "Monthly_Financials",
+          "nodeLineageTag": "99bba023-2511-44f0-aa49-41a260072452",
+          "size": {
+            "height": 248,
+            "width": 234
+          },
+          "zIndex": 0
+        },
+        {
+          "location": {
+            "x": 568,
+            "y": 27.375
+          },
+          "nodeIndex": "Date",
+          "nodeLineageTag": "04a3dfd6-3596-466c-a88d-2c35226d0530",
+          "size": {
+            "height": 300,
+            "width": 234
+          },
+          "zIndex": 0
+        },
+        {
+          "location": {
+            "x": 802,
+            "y": 76.375
+          },
+          "nodeIndex": "Geography",
+          "nodeLineageTag": "0a8253c8-b888-4a70-a3e4-a92923a0935e",
+          "size": {
+            "height": 176,
+            "width": 234
+          },
+          "zIndex": 0
+        },
+        {
+          "location": {
+            "x": 1036,
+            "y": 63.875
+          },
+          "nodeIndex": "_Measures",
+          "nodeLineageTag": "fad8f2bd-6463-47eb-baf0-221f99dc6cd7",
+          "size": {
+            "height": 200,
+            "width": 234
+          },
+          "zIndex": 0
+        },
+        {
+          "location": {
+            "x": 1270,
+            "y": 99.125
+          },
+          "nodeIndex": "EBITDA Bridge",
+          "nodeLineageTag": "f6088490-5219-4683-bbda-7a95c9c90912",
+          "size": {
+            "height": 128,
+            "width": 234
+          },
+          "zIndex": 0
+        }
+      ],
+      "name": "All tables",
+      "zoomValue": 100,
+      "pinKeyFieldsToTop": false,
+      "showExtraHeaderInfo": false,
+      "hideKeyFieldsWhenCollapsed": false,
+      "tablesLocked": false
+    }
+  ],
+  "selectedDiagram": "All tables",
+  "defaultDiagram": "All tables"
+}

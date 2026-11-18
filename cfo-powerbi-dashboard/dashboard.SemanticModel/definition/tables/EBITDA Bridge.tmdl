@@ -1,0 +1,33 @@
+/// SUPPORTING - disconnected table with no relationships. Supplies the three ordered categories for the EBITDA plan-to-actual waterfall on the Profitability page. Used only with [EBITDA Bridge Value].
+table 'EBITDA Bridge'
+	lineageTag: f6088490-5219-4683-bbda-7a95c9c90912
+
+	/// Waterfall category. Use as the Category field of the EBITDA bridge visual.
+	column Step
+		lineageTag: e73fcd05-b0f3-478c-bdc8-8378e3266dd1
+		summarizeBy: none
+		isNameInferred
+		sourceColumn: [Step]
+		sortByColumn: 'Step Order'
+
+	/// Sort key for Step.
+	column 'Step Order'
+		isHidden
+		lineageTag: 80fd9bef-28d6-405a-94e4-b51f1b3cd31c
+		summarizeBy: none
+		isNameInferred
+		sourceColumn: [Step Order]
+
+	partition 'EBITDA Bridge' = calculated
+		mode: import
+		source =
+				DATATABLE (
+				    "Step", STRING,
+				    "Step Order", INTEGER,
+				    {
+				        { "Plan EBITDA", 1 },
+				        { "Revenue vs Plan", 2 },
+				        { "Cost vs Plan", 3 }
+				    }
+				)
+

@@ -1,0 +1,12 @@
+relationship Date_to_Monthly_Financials
+	fromColumn: Monthly_Financials.Month
+	toColumn: Date.Date
+
+relationship Date_to_Country_Performance
+	fromColumn: Country_Performance.Month
+	toColumn: Date.Date
+
+relationship Geography_to_Country_Performance
+	fromColumn: Country_Performance.Country
+	toColumn: Geography.Country
+

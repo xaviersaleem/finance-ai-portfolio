@@ -1,0 +1,100 @@
+/// FACT - company-level monthly financials. Grain: one row per month. Contains cost actuals, revenue and cost budget, closing cash and free cash flow. Not attributable by country; Geography filters do not apply to this table.
+table Monthly_Financials
+	lineageTag: 99bba023-2511-44f0-aa49-41a260072452
+
+	/// Month-start date. Relationship key to the Date table. Hidden - use the Date table for all time filtering.
+	column Month
+		dataType: dateTime
+		isHidden
+		formatString: yyyy-mm-dd
+		lineageTag: b5f1a6b8-3553-4450-a5a7-ab96ba9669c4
+		summarizeBy: none
+		sourceColumn: Month
+
+		annotation SummarizationSetBy = Automatic
+
+	/// Raw column. Exposed through the [COGS] measure.
+	column COGS
+		dataType: double
+		isHidden
+		lineageTag: 425fd4f6-2dfa-4954-af1d-ef6070ab6eb9
+		summarizeBy: none
+		sourceColumn: COGS
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	/// Raw column. Exposed through the [Opex] measure.
+	column Opex
+		dataType: double
+		isHidden
+		lineageTag: 861bcd41-0bfa-4a59-86bc-cb727d7aa09a
+		summarizeBy: none
+		sourceColumn: Opex
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	/// Raw column. Exposed through the [Revenue Budget] measure.
+	column Revenue_Budget
+		dataType: double
+		isHidden
+		lineageTag: 61c4a31a-c661-4f5c-874c-ddcce11518d8
+		summarizeBy: none
+		sourceColumn: Revenue_Budget
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	/// Raw column. Exposed through the [Cost Budget] measure.
+	column Cost_Budget
+		dataType: double
+		isHidden
+		lineageTag: 298bfc22-fc7a-42ae-8e50-cfa45f1d80c5
+		summarizeBy: none
+		sourceColumn: Cost_Budget
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	/// Raw column, month-end snapshot. Exposed through the semi-additive [Cash Balance] measure.
+	column CashBalance
+		dataType: double
+		isHidden
+		lineageTag: 3e0ea4fd-56c0-4d22-a582-0726326d1d99
+		summarizeBy: none
+		sourceColumn: CashBalance
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	/// Raw column. Exposed through the [Free Cash Flow] measure.
+	column FreeCashFlow
+		dataType: double
+		isHidden
+		lineageTag: 6e9c50b3-390d-488f-afcc-a7949634fceb
+		summarizeBy: none
+		sourceColumn: FreeCashFlow
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	partition Monthly_Financials = m
+		mode: import
+		source =
+				let
+				  Source = Excel.Workbook(File.Contents("C:\Users\Mehedi\Documents\TitanFlow\TitanFlow_CFO_Dashboard_Data.xlsx"), null, true),
+				  #"Navigation 1" = Source{[Item = "Monthly_Financials", Kind = "Sheet"]}[Data],
+				  #"Promoted headers" = Table.PromoteHeaders(#"Navigation 1", [PromoteAllScalars = true]),
+				  #"Changed column type" = Table.TransformColumnTypes(#"Promoted headers", {{"Month", Int64.Type}, {"COGS", type number}, {"Opex", type number}, {"Revenue_Budget", type number}, {"Cost_Budget", type number}, {"CashBalance", type number}, {"FreeCashFlow", type number}})
+				in
+				  #"Changed column type"
+
+	annotation PBI_ResultType = Table
+

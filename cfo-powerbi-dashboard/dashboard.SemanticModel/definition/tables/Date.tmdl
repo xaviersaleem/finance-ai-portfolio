@@ -1,0 +1,160 @@
+/// Marked calendar date dimension (2021-2026) driving all time intelligence. Grain: day. Facts join on month-start date.
+table Date
+	lineageTag: 04a3dfd6-3596-466c-a88d-2c35226d0530
+	dataCategory: Time
+
+	/// Day-grain date key. Marked date table column.
+	column Date
+		isUnique
+		formatString: dd mmm yyyy
+		lineageTag: 2198b10b-6cf6-4c33-b648-80174d4dd59e
+		summarizeBy: none
+		isNameInferred
+		sourceColumn: [Date]
+
+	/// Calendar year.
+	column Year
+		formatString: 0
+		lineageTag: a3c4361d-8996-4bbc-a216-31fb5e8580ef
+		summarizeBy: none
+		isNameInferred
+		sourceColumn: [Year]
+
+	/// Sort key for Quarter.
+	column 'Quarter Number'
+		isHidden
+		lineageTag: 6285d79f-3384-4c14-aa0a-4f38c4cdb33d
+		summarizeBy: none
+		isNameInferred
+		sourceColumn: [Quarter Number]
+
+	/// Calendar quarter label (Q1-Q4).
+	column Quarter
+		lineageTag: 7629df1f-eea6-49f7-aa72-86bbbc793b74
+		summarizeBy: none
+		isNameInferred
+		sourceColumn: [Quarter]
+		sortByColumn: 'Quarter Number'
+
+	/// Year and quarter label, e.g. 2026-Q2.
+	column 'Year Quarter'
+		lineageTag: 03065dd5-bb20-494e-889d-e239bfea9b35
+		summarizeBy: none
+		isNameInferred
+		sourceColumn: [Year Quarter]
+		sortByColumn: 'Year Quarter Sort'
+
+	/// Sort key for Year Quarter.
+	column 'Year Quarter Sort'
+		isHidden
+		lineageTag: 69295f88-212a-4e80-a591-f53f136aa150
+		summarizeBy: none
+		isNameInferred
+		sourceColumn: [Year Quarter Sort]
+
+	/// Sort key for Month.
+	column 'Month Number'
+		isHidden
+		lineageTag: b3e3ab06-8c06-4dcc-9834-deb4b8702f4a
+		summarizeBy: none
+		isNameInferred
+		sourceColumn: [Month Number]
+
+	/// Short month name, e.g. Jun. Use for seasonality comparisons across years.
+	column Month
+		lineageTag: 5156e669-0493-48c2-bc8c-4be72d7aafa1
+		summarizeBy: none
+		isNameInferred
+		sourceColumn: [Month]
+		sortByColumn: 'Month Number'
+
+	/// Primary time axis label for all trend visuals, e.g. Jun 2026.
+	column 'Month Year'
+		lineageTag: 16e08724-5508-49b0-a78c-490a03328315
+		summarizeBy: none
+		isNameInferred
+		sourceColumn: [Month Year]
+		sortByColumn: 'Month Year Sort'
+
+	/// Sort key for Month Year.
+	column 'Month Year Sort'
+		isHidden
+		lineageTag: 681fee6b-e810-4fcc-b1d6-72176d574361
+		summarizeBy: none
+		isNameInferred
+		sourceColumn: [Month Year Sort]
+
+	/// First day of the month. Internal helper for period anchoring.
+	column 'Month Start Date'
+		isHidden
+		formatString: dd mmm yyyy
+		lineageTag: 89e27ac8-083d-403f-a8af-b5bd925255b7
+		summarizeBy: none
+		isNameInferred
+		sourceColumn: [Month Start Date]
+
+	/// Last day of the month. Internal helper.
+	column 'Month End Date'
+		isHidden
+		formatString: dd mmm yyyy
+		lineageTag: 691eabdb-4156-41e3-8d57-bab1d5b23a6a
+		summarizeBy: none
+		isNameInferred
+		sourceColumn: [Month End Date]
+
+	/// TRUE when the month has posted actuals (through the last closed month). Use to exclude forward budget-only months from actuals visuals.
+	column 'Is Actual Month'
+		lineageTag: cebe9aef-af10-4178-9c09-4806b740c31f
+		summarizeBy: none
+		isNameInferred
+		sourceColumn: [Is Actual Month]
+
+	/// TRUE for the twelve closed months ending at the last closed month. Use as the default rolling window filter.
+	column 'Is Latest 12 Months'
+		lineageTag: 1faaef91-d3e3-4065-b318-b4fa8007c237
+		summarizeBy: none
+		isNameInferred
+		sourceColumn: [Is Latest 12 Months]
+
+	/// Year > Quarter > Month drill path for all time-based visuals.
+	hierarchy Calendar
+		lineageTag: 72c4fa0b-e40d-4bc9-9afd-9971c0015f70
+
+		level Year
+			lineageTag: 28c71c6f-3637-4f67-b973-d3baf0e7298b
+			column: Year
+
+		level Quarter
+			lineageTag: 7b7f830a-d024-4652-ba34-2de1b442a83c
+			column: 'Year Quarter'
+
+		level Month
+			lineageTag: 3a00620c-7211-4712-9dd2-ab4a7f12c125
+			column: 'Month Year'
+
+	partition Date = calculated
+		mode: import
+		source =
+				VAR _LastActual =
+				    MAXX ( FILTER ( Monthly_Financials, NOT ISBLANK ( Monthly_Financials[COGS] ) ), Monthly_Financials[Month] )
+				VAR _MinDate = DATE ( YEAR ( MINX ( Monthly_Financials, Monthly_Financials[Month] ) ), 1, 1 )
+				VAR _MaxDate = DATE ( YEAR ( MAXX ( Monthly_Financials, Monthly_Financials[Month] ) ), 12, 31 )
+				RETURN
+				    ADDCOLUMNS (
+				        CALENDAR ( _MinDate, _MaxDate ),
+				        "Year", YEAR ( [Date] ),
+				        "Quarter Number", QUARTER ( [Date] ),
+				        "Quarter", "Q" & QUARTER ( [Date] ),
+				        "Year Quarter", FORMAT ( YEAR ( [Date] ), "0000" ) & "-Q" & QUARTER ( [Date] ),
+				        "Year Quarter Sort", YEAR ( [Date] ) * 10 + QUARTER ( [Date] ),
+				        "Month Number", MONTH ( [Date] ),
+				        "Month", FORMAT ( [Date], "mmm" ),
+				        "Month Year", FORMAT ( [Date], "mmm yyyy" ),
+				        "Month Year Sort", YEAR ( [Date] ) * 100 + MONTH ( [Date] ),
+				        "Month Start Date", DATE ( YEAR ( [Date] ), MONTH ( [Date] ), 1 ),
+				        "Month End Date", EOMONTH ( [Date], 0 ),
+				        "Is Actual Month", DATE ( YEAR ( [Date] ), MONTH ( [Date] ), 1 ) <= _LastActual,
+				        "Is Latest 12 Months", DATE ( YEAR ( [Date] ), MONTH ( [Date] ), 1 ) > EDATE ( _LastActual, -12 )
+				            && DATE ( YEAR ( [Date] ), MONTH ( [Date] ), 1 ) <= _LastActual
+				    )
+

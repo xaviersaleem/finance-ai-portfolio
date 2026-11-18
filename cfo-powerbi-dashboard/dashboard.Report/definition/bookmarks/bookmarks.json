@@ -1,0 +1,25 @@
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/bookmarksMetadata/1.0.0/schema.json",
+  "items": [
+    {
+      "name": "BM_Reset_P1"
+    },
+    {
+      "name": "BM_Reset_P2"
+    },
+    {
+      "name": "BM_Reset_P3"
+    },
+    {
+      "name": "BM_Reset_P4"
+    },
+    {
+      "name": "BM_P3_ViewGroup",
+      "displayName": "Profitability view",
+      "children": [
+        "BM_P3_Variance",
+        "BM_P3_Mix"
+      ]
+    }
+  ]
+}

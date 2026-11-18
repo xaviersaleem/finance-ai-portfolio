@@ -1,0 +1,188 @@
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/page/2.1.0/schema.json",
+  "name": "pgprofitcost0000003",
+  "displayName": "Profitability & Cost",
+  "displayOption": "FitToPage",
+  "height": 720,
+  "width": 1280,
+  "objects": {
+    "background": [
+      {
+        "properties": {
+          "color": {
+            "solid": {
+              "color": {
+                "expr": {
+                  "Literal": {
+                    "Value": "'#F4F6F8'"
+                  }
+                }
+              }
+            }
+          },
+          "transparency": {
+            "expr": {
+              "Literal": {
+                "Value": "0D"
+              }
+            }
+          }
+        }
+      }
+    ],
+    "outspace": [
+      {
+        "properties": {
+          "color": {
+            "solid": {
+              "color": {
+                "expr": {
+                  "Literal": {
+                    "Value": "'#F4F6F8'"
+                  }
+                }
+              }
+            }
+          },
+          "transparency": {
+            "expr": {
+              "Literal": {
+                "Value": "0D"
+              }
+            }
+          }
+        }
+      }
+    ],
+    "displayArea": [
+      {
+        "properties": {
+          "verticalAlignment": {
+            "expr": {
+              "Literal": {
+                "Value": "'Top'"
+              }
+            }
+          }
+        }
+      }
+    ]
+  },
+  "filterConfig": {
+    "filters": [
+      {
+        "name": "p3pgf",
+        "type": "Categorical",
+        "field": {
+          "Column": {
+            "Expression": {
+              "SourceRef": {
+                "Entity": "Date"
+              }
+            },
+            "Property": "Is Actual Month"
+          }
+        },
+        "filter": {
+          "Version": 2,
+          "From": [
+            {
+              "Name": "t",
+              "Entity": "Date",
+              "Type": 0
+            }
+          ],
+          "Where": [
+            {
+              "Condition": {
+                "In": {
+                  "Expressions": [
+                    {
+                      "Column": {
+                        "Expression": {
+                          "SourceRef": {
+                            "Source": "t"
+                          }
+                        },
+                        "Property": "Is Actual Month"
+                      }
+                    }
+                  ],
+                  "Values": [
+                    [
+                      {
+                        "Literal": {
+                          "Value": "true"
+                        }
+                      }
+                    ]
+                  ]
+                }
+              }
+            }
+          ]
+        },
+        "howCreated": "User",
+        "isHiddenInViewMode": true,
+        "isLockedInViewMode": true
+      }
+    ]
+  },
+  "visualInteractions": [
+    {
+      "source": "p3a2",
+      "target": "p3kpi0",
+      "type": "NoFilter"
+    },
+    {
+      "source": "p3a2",
+      "target": "p3kpi1",
+      "type": "NoFilter"
+    },
+    {
+      "source": "p3a2",
+      "target": "p3kpi2",
+      "type": "NoFilter"
+    },
+    {
+      "source": "p3a2",
+      "target": "p3kpi3",
+      "type": "NoFilter"
+    },
+    {
+      "source": "p3a2",
+      "target": "p3kpi4",
+      "type": "NoFilter"
+    },
+    {
+      "source": "p3a2",
+      "target": "p3kpi5",
+      "type": "NoFilter"
+    },
+    {
+      "source": "p3a2",
+      "target": "p3a1",
+      "type": "NoFilter"
+    },
+    {
+      "source": "p3a2",
+      "target": "p3b1",
+      "type": "NoFilter"
+    },
+    {
+      "source": "p3a2",
+      "target": "p3b2",
+      "type": "NoFilter"
+    },
+    {
+      "source": "p3a2",
+      "target": "p3b3",
+      "type": "NoFilter"
+    },
+    {
+      "source": "p3a2",
+      "target": "p3ctx",
+      "type": "NoFilter"
+    }
+  ]
+}

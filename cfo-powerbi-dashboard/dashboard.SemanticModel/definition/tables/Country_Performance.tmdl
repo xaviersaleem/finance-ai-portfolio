@@ -1,0 +1,95 @@
+/// FACT - country-level monthly performance. Grain: one row per country per month. Contains revenue, closing ARR, closing customer count and churned ARR.
+table Country_Performance
+	lineageTag: 23391055-13a6-4bf6-a317-329de38fb4bd
+
+	/// Month-start date. Relationship key to the Date table. Hidden - use the Date table for all time filtering.
+	column Month
+		dataType: dateTime
+		isHidden
+		formatString: yyyy-mm-dd
+		lineageTag: e3991970-6d01-4372-8c06-6e681c5fdc94
+		summarizeBy: none
+		sourceColumn: Month
+
+		annotation SummarizationSetBy = Automatic
+
+	/// Relationship key to the Geography table. Hidden - use Geography[Country] for reporting.
+	column Country
+		dataType: string
+		isHidden
+		lineageTag: c0e40127-7edb-4bf7-8748-72d1b6e889b4
+		summarizeBy: none
+		sourceColumn: Country
+
+		annotation SummarizationSetBy = Automatic
+
+	/// Redundant with Geography[Region]. Hidden to enforce a single source of truth.
+	column Region
+		dataType: string
+		isHidden
+		lineageTag: 138f7cba-13db-4624-af75-a4e7cc30403e
+		summarizeBy: none
+		sourceColumn: Region
+
+		annotation SummarizationSetBy = Automatic
+
+	/// Raw column. Exposed through the [Revenue] measure.
+	column Revenue
+		dataType: double
+		isHidden
+		lineageTag: e14f914a-6f9b-4e7b-9f30-d17fbb4d734e
+		summarizeBy: none
+		sourceColumn: Revenue
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	/// Raw column, month-end snapshot. Exposed through the semi-additive [ARR] measure.
+	column ARR
+		dataType: double
+		isHidden
+		lineageTag: 21a5c8f9-c47b-4df5-aa0c-b53979e4e71a
+		summarizeBy: none
+		sourceColumn: ARR
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	/// Raw column, month-end snapshot. Exposed through the semi-additive [Customers] measure.
+	column Customers
+		dataType: int64
+		isHidden
+		formatString: 0
+		lineageTag: c1091245-4cf5-45c8-9882-56c0ab3a50c0
+		summarizeBy: none
+		sourceColumn: Customers
+
+		annotation SummarizationSetBy = Automatic
+
+	/// Raw column. Exposed through the [Churned ARR] measure.
+	column ChurnedARR
+		dataType: double
+		isHidden
+		lineageTag: 89c5685a-3af0-4666-911d-d593487223f9
+		summarizeBy: none
+		sourceColumn: ChurnedARR
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	partition Country_Performance = m
+		mode: import
+		source =
+				let
+				  Source = Excel.Workbook(File.Contents("C:\Users\Mehedi\Documents\TitanFlow\TitanFlow_CFO_Dashboard_Data.xlsx"), null, true),
+				  #"Navigation 1" = Source{[Item = "Country_Performance", Kind = "Sheet"]}[Data],
+				  #"Promoted headers" = Table.PromoteHeaders(#"Navigation 1", [PromoteAllScalars = true]),
+				  #"Changed column type" = Table.TransformColumnTypes(#"Promoted headers", {{"Month", Int64.Type}, {"Country", type text}, {"Region", type text}, {"Revenue", type number}, {"ARR", type number}, {"Customers", Int64.Type}, {"ChurnedARR", type number}})
+				in
+				  #"Changed column type"
+
+	annotation PBI_ResultType = Table
+
